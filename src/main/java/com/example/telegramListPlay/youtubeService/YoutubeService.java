@@ -19,6 +19,9 @@ public class YoutubeService {
     }
 
     public File getYoutubeVideo(String videoId) throws VideoDownloadingException {
+        if (isExistingYouTubeVideoId(videoId))
+            throw new VideoDownloadingException(
+                    "Не удалось найти видео с таким id, возможно его не существует или ссылка была указана не верно.");
         return youtubeClient.downloadAudio(videoId);
     }
 
@@ -147,5 +150,17 @@ public class YoutubeService {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(text);
         return matcher.matches();
+    }
+
+    public boolean isExistingYouTubePlaylistId(String playlistId) {
+        if (isYoutubePlaylistId(playlistId)) {
+            System.out.println("It is not videoId.");
+            return false;
+        }
+        if (youtubeClient.isExistingPlaylist(playlistId)) {
+            System.out.println("video with id " + playlistId + "not found");
+            return true;
+        } else
+            return false;
     }
 }

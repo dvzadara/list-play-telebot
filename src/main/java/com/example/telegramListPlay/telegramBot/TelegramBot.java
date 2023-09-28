@@ -16,7 +16,7 @@ import java.io.File;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
-    private YoutubeService youtubeService;
+        private YoutubeService youtubeService;
     private static final String START = "/start";
     private static final String GET_VIDEO = "/video";
 
@@ -37,9 +37,15 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (message.equals("/start"))
             sendStartMessage(chatId);
         else if (youtubeService.isYoutubePlaylistId(message)) {
-            sendPlaylistMessage(chatId, message);
+            if (youtubeService.isExistingYouTubePlaylistId(message))
+                sendPlaylistMessage(chatId, message);
+            else
+                sendMessage(chatId, "Плейлист с таким id не найден.");
         } else if (youtubeService.isYoutubeVideoId(message)) {
-            sendVideoMessage(chatId, message);
+            if (youtubeService.isExistingYouTubeVideoId(message))
+                sendVideoMessage(chatId, message);
+            else
+                sendMessage(chatId, "Видео с таким id не найдено.");
         } else if (youtubeService.isExistingYouTubePlaylistLink(message)) {
             String playlistId = youtubeService.linkToPlaylistId(message);
             sendPlaylistMessage(chatId, playlistId);
