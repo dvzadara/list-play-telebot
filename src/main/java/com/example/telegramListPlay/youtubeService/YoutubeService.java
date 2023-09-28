@@ -1,5 +1,9 @@
 package com.example.telegramListPlay.youtubeService;
 
+import com.example.telegramListPlay.telegramBot.PlaylistSenderInterface;
+import com.example.telegramListPlay.Exceptions.PlaylistDownloadingException;
+import com.example.telegramListPlay.Exceptions.VideoDownloadingException;
+import com.github.kiulian.downloader.model.playlist.PlaylistInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +20,6 @@ public class YoutubeService {
     @Autowired
     public YoutubeService(YoutubeClient youtubeClient) {
         this.youtubeClient = youtubeClient;
-    }
-
-    public File getYoutubeVideo(String videoId) throws VideoDownloadingException {
-        if (isExistingYouTubeVideoId(videoId))
-            throw new VideoDownloadingException(
-                    "Не удалось найти видео с таким id, возможно его не существует или ссылка была указана не верно.");
-        return youtubeClient.downloadAudio(videoId);
     }
 
     public String linkToVideoId(String link) {
@@ -48,6 +45,39 @@ public class YoutubeService {
         }
     }
 
+    public String linkToPlaylistId(String link)  {
+        try {
+            URL url = new URL(link);
+            String query = url.getQuery();
+            String[] pairs = query.split("&");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=");
+                String key = keyValue[0];
+                String value = keyValue[1];
+                if (key.equals("list")) {
+                    return value;
+                }
+            }
+            return null;
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
+
+    public boolean isYoutubeVideoId(String text) {
+        String regex = "^[a-zA-Z0-9_-]{11}$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(text);
+        return matcher.matches();
+    }
+
+    public boolean isYoutubePlaylistId(String text) {
+        String regex = "^[a-zA-Z0-9_-]{34}$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(text);
+        return matcher.matches();
+    }
+
     public boolean isYouTubeVideoLink(String link) {
         try {
             URL url = new URL(link);
@@ -60,6 +90,41 @@ public class YoutubeService {
         } catch (MalformedURLException e) {
             return false;
         }
+    }
+
+    public boolean isYouTubePlaylistLink(String link) {
+        try {
+            URL url = new URL(link);
+            String host = url.getHost();
+            String query = url.getQuery();
+            return host.endsWith("youtube.com") && query != null && query.contains("list=");
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
+
+    public boolean isExistingYouTubeVideoId(String videoId) {
+        if (isYoutubeVideoId(videoId)) {
+            System.out.println("It is not videoId.");
+            return false;
+        }
+        if (youtubeClient.isExistingVideo(videoId)) {
+            System.out.println("video with id " + videoId + "not found");
+            return true;
+        } else
+            return false;
+    }
+
+    public boolean isExistingYouTubePlaylistId(String playlistId) {
+        if (isYoutubePlaylistId(playlistId)) {
+            System.out.println("It is not videoId.");
+            return false;
+        }
+        if (youtubeClient.isExistingPlaylist(playlistId)) {
+            System.out.println("video with id " + playlistId + "not found");
+            return true;
+        } else
+            return false;
     }
 
     public boolean isExistingYouTubeVideoLink(String link) {
@@ -96,71 +161,26 @@ public class YoutubeService {
             return false;
     }
 
-    public String linkToPlaylistId(String link)  {
+    public File getYoutubeVideo(String videoId) throws VideoDownloadingException {
+        if (isExistingYouTubeVideoId(videoId))
+            throw new VideoDownloadingException(
+                    "Не удалось найти видео с таким id, возможно его не существует или ссылка была указана не верно.");
+        return youtubeClient.downloadAudio(videoId);
+    }
+
+    public void getYoutubePlaylist(Long chatId, String playlistId, PlaylistSenderInterface playlistSender) {
+        playlistSender.sendStartDownloadingMessage(chatId);
         try {
-            URL url = new URL(link);
-            String query = url.getQuery();
-            String[] pairs = query.split("&");
-            for (String pair : pairs) {
-                String[] keyValue = pair.split("=");
-                String key = keyValue[0];
-                String value = keyValue[1];
-                if (key.equals("list")) {
-                    return value;
-                }
+            PlaylistInfo playlistInfo = youtubeClient.getPlaylistInfo(playlistId);
+            int videoCount = playlistInfo.details().videoCount();
+            for(int i = 0; i < videoCount; i++){
+                File file = youtubeClient.downloadAudio(playlistInfo.videos().get(i).videoId());
+                playlistSender.sendVideoMessage(chatId, file);
+                file.delete();
             }
-            return null;
-        } catch (MalformedURLException e) {
-            return null;
+        } catch (PlaylistDownloadingException | VideoDownloadingException e) {
+            playlistSender.sendVideoDownloadingError(chatId, e);
         }
-    }
-
-    public boolean isYouTubePlaylistLink(String link) {
-        try {
-            URL url = new URL(link);
-            String host = url.getHost();
-            String query = url.getQuery();
-            return host.endsWith("youtube.com") && query != null && query.contains("list=");
-        } catch (MalformedURLException e) {
-            return false;
-        }
-    }
-
-    public boolean isYoutubeVideoId(String text) {
-        String regex = "^[a-zA-Z0-9_-]{11}$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(text);
-        return matcher.matches();
-    }
-
-    public boolean isExistingYouTubeVideoId(String videoId) {
-        if (isYoutubeVideoId(videoId)) {
-            System.out.println("It is not videoId.");
-            return false;
-        }
-        if (youtubeClient.isExistingVideo(videoId)) {
-            System.out.println("video with id " + videoId + "not found");
-            return true;
-        } else
-            return false;
-    }
-
-    public boolean isYoutubePlaylistId(String text) {
-        String regex = "^[a-zA-Z0-9_-]{34}$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(text);
-        return matcher.matches();
-    }
-
-    public boolean isExistingYouTubePlaylistId(String playlistId) {
-        if (isYoutubePlaylistId(playlistId)) {
-            System.out.println("It is not videoId.");
-            return false;
-        }
-        if (youtubeClient.isExistingPlaylist(playlistId)) {
-            System.out.println("video with id " + playlistId + "not found");
-            return true;
-        } else
-            return false;
+        playlistSender.sendEndDownloadingMessage(chatId);
     }
 }

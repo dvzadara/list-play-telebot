@@ -1,11 +1,12 @@
 package com.example.telegramListPlay.youtubeService;
 
+import com.example.telegramListPlay.Exceptions.PlaylistDownloadingException;
+import com.example.telegramListPlay.Exceptions.VideoDownloadingException;
 import com.github.kiulian.downloader.YoutubeDownloader;
 import com.github.kiulian.downloader.downloader.request.RequestPlaylistInfo;
 import com.github.kiulian.downloader.downloader.request.RequestVideoFileDownload;
 import com.github.kiulian.downloader.downloader.request.RequestVideoInfo;
 import com.github.kiulian.downloader.downloader.response.Response;
-import com.github.kiulian.downloader.downloader.response.ResponseStatus;
 import com.github.kiulian.downloader.model.playlist.PlaylistInfo;
 import com.github.kiulian.downloader.model.videos.VideoInfo;
 import com.github.kiulian.downloader.model.videos.formats.Format;
@@ -47,5 +48,13 @@ public class YoutubeClient {
         RequestPlaylistInfo infoRequest = new RequestPlaylistInfo(playlistId);
         Response<PlaylistInfo> infoResponse = downloader.getPlaylistInfo(infoRequest);
         return infoResponse.ok();
+    }
+
+    public PlaylistInfo getPlaylistInfo(String playlistId) throws PlaylistDownloadingException {
+        RequestPlaylistInfo infoRequest = new RequestPlaylistInfo(playlistId);
+        Response<PlaylistInfo> infoResponse = downloader.getPlaylistInfo(infoRequest);
+        if (!infoResponse.ok())
+            throw new PlaylistDownloadingException("Не удалось скачать плейлист по ссылке.");
+        return infoResponse.data();
     }
 }

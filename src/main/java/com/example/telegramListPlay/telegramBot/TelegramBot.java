@@ -1,6 +1,6 @@
 package com.example.telegramListPlay.telegramBot;
 
-import com.example.telegramListPlay.youtubeService.VideoDownloadingException;
+import com.example.telegramListPlay.Exceptions.VideoDownloadingException;
 import com.example.telegramListPlay.youtubeService.YoutubeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,8 +15,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.File;
 
 @Component
-public class TelegramBot extends TelegramLongPollingBot {
-        private YoutubeService youtubeService;
+public class TelegramBot extends TelegramLongPollingBot implements PlaylistSenderInterface {
+    private YoutubeService youtubeService;
     private static final String START = "/start";
     private static final String GET_VIDEO = "/video";
 
@@ -36,32 +36,15 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         if (message.equals("/start"))
             sendStartMessage(chatId);
-        else if (youtubeService.isYoutubePlaylistId(message)) {
-            if (youtubeService.isExistingYouTubePlaylistId(message))
-                sendPlaylistMessage(chatId, message);
-            else
-                sendMessage(chatId, "Плейлист с таким id не найден.");
-        } else if (youtubeService.isYoutubeVideoId(message)) {
-            if (youtubeService.isExistingYouTubeVideoId(message))
-                sendVideoMessage(chatId, message);
-            else
-                sendMessage(chatId, "Видео с таким id не найдено.");
-        } else if (youtubeService.isExistingYouTubePlaylistLink(message)) {
+        else if (youtubeService.isExistingYouTubePlaylistLink(message)) {
             String playlistId = youtubeService.linkToPlaylistId(message);
-            sendPlaylistMessage(chatId, playlistId);
+            youtubeService.getYoutubePlaylist(chatId, playlistId, this);
         } else if (youtubeService.isExistingYouTubeVideoLink(message)) {
             String videoId = youtubeService.linkToVideoId(message);
             sendVideoMessage(chatId, videoId);
         } else {
             sendUncorrectRequestMessage(chatId);
         }
-    }
-
-    private void sendPlaylistMessage(Long chatId, String playlistId) {
-        String text = """
-                Пока что конвертация плейлистов не доступна.
-                """;
-        sendMessage(chatId, text);
     }
 
     @Override
@@ -99,7 +82,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         sendMessage(chatId, text);
     }
 
-    private void sendDocUploadingAFile(Long chatId, File save) throws TelegramApiException {
+    private void sendMessageWithFile(Long chatId, File save) throws TelegramApiException {
         SendDocument sendDocument = new SendDocument();
         sendDocument.setChatId(chatId);
         sendDocument.setDocument(new InputFile(save));
@@ -110,7 +93,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             File videoFile = youtubeService.getYoutubeVideo(videoId);
             try {
-                sendDocUploadingAFile(chatId, videoFile);
+                sendMessageWithFile(chatId, videoFile);
             } catch (TelegramApiException e) {
                 sendMessage(chatId, "Не удалось отправить файл.");
             } finally {
@@ -119,5 +102,34 @@ public class TelegramBot extends TelegramLongPollingBot {
         } catch (VideoDownloadingException e) {
             sendMessage(chatId, e.getMessage());
         }
+    }
+
+    @Override
+    public void sendVideoMessage(Long chatId, File videoFile) {
+        try {
+            sendMessageWithFile(chatId, videoFile);
+        } catch (TelegramApiException e) {
+            sendMessage(chatId, "Не удалось отправить файл.");
+        }
+    }
+
+    @Override
+    public void sendStartDownloadingMessage(Long chatId) {
+        String text = """
+                Загрузка плейлиста началась.
+                """;
+        sendMessage(chatId, text);
+    }
+
+    @Override
+    public void sendEndDownloadingMessage(Long chatId) {
+        String text = """
+                Загрузка плейлиста завершена.
+                """;
+    }
+
+    @Override
+    public void sendVideoDownloadingError(Long chatId, Exception e) {
+        sendMessage(chatId, e.getMessage());
     }
 }
