@@ -2,6 +2,7 @@ package com.example.telegramListPlay.youtubeService;
 
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 
 import java.io.File;
@@ -13,13 +14,14 @@ public class ToMp3Converter {
     public static File mediaFileToMp3(File mediaFile) throws IOException {
         String mediaFilePath = mediaFile.getPath();
         String mp3FilePath = mediaFile.getParent() + changeFileExtension(mediaFile.getName(), "mp3");
-//        FFmpeg ffmpeg = new FFmpeg();
+        FFmpeg ffmpeg = new FFmpeg("/lib/ffmpeg/bin/ffmpeg.exe");
+        FFprobe ffprobe = new FFprobe("/lib/ffmpeg/bin/ffprobe.exe");
         FFmpegBuilder builder = new FFmpegBuilder()
                 .setInput(mediaFilePath)
                 .addOutput(mp3FilePath)
                 .done();
 
-        FFmpegExecutor executor = new FFmpegExecutor();
+        FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
         executor.createJob(builder).run();
         return new File(mp3FilePath);
     }
