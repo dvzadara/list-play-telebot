@@ -1,6 +1,5 @@
 package com.example.telegramListPlay.telegramBot;
 
-import com.example.telegramListPlay.Exceptions.VideoDownloadingException;
 import com.example.telegramListPlay.youtubeService.YoutubeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +13,11 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
 
+/**
+ * Сlass for processing messages from the Telegram user, and with functions for sending messages.
+ */
 @Component
-public class TelegramBot extends TelegramLongPollingBot implements PlaylistSenderInterface {
+public class TelegramBot extends TelegramLongPollingBot implements AudiosSenderInterface {
     private YoutubeService youtubeService;
     private static final String START = "/start";
     private static final String GET_VIDEO = "/video";
@@ -26,6 +28,10 @@ public class TelegramBot extends TelegramLongPollingBot implements PlaylistSende
         this.youtubeService = youtubeService;
     }
 
+    /**
+     * Processes requests from telegram user.
+     * @param update
+     */
     @Override
     public void onUpdateReceived(Update update) {
         if (!update.hasMessage() || !update.getMessage().hasText()) {
@@ -35,13 +41,13 @@ public class TelegramBot extends TelegramLongPollingBot implements PlaylistSende
         var chatId = update.getMessage().getChatId();
 
         if (message.equals("/start"))
-            sendStartMessage(chatId);
+            sendWelcomeMessage(chatId);
         else if (youtubeService.isExistingYouTubePlaylistLink(message)) {
             String playlistId = youtubeService.linkToPlaylistId(message);
             youtubeService.getYoutubePlaylist(chatId, playlistId, this);
         } else if (youtubeService.isExistingYouTubeVideoLink(message)) {
             String videoId = youtubeService.linkToVideoId(message);
-            sendVideoMessage(chatId, videoId);
+            youtubeService.getYoutubeVideo(chatId, videoId, this);
         } else {
             sendUncorrectRequestMessage(chatId);
         }
@@ -52,6 +58,11 @@ public class TelegramBot extends TelegramLongPollingBot implements PlaylistSende
         return "listPlay";
     }
 
+    /**
+     * Send text to telegram user.
+     * @param chatId
+     * @param text Message text.
+     */
     public void sendMessage(Long chatId, String text) {
         String chatIdStr = String.valueOf(chatId);
         SendMessage sendMessage = new SendMessage(chatIdStr, text);
@@ -62,7 +73,11 @@ public class TelegramBot extends TelegramLongPollingBot implements PlaylistSende
         }
     }
 
-    private void sendStartMessage(Long chatId) {
+    /**
+     * Send welcome message to user.
+     * @param chatId
+     */
+    private void sendWelcomeMessage(Long chatId) {
         String text = """
                 Добро пожаловать!
                                 
@@ -75,6 +90,10 @@ public class TelegramBot extends TelegramLongPollingBot implements PlaylistSende
         sendMessage(chatId, text);
     }
 
+    /**
+     * Sending a message that the request was not recognized.
+     * @param chatId
+     */
     private void sendUncorrectRequestMessage(Long chatId) {
         String text = """
                 Не удалось найти ссылку или id ютуб видео или плейлиста. Возможно в ссылке ошибка.
@@ -89,23 +108,8 @@ public class TelegramBot extends TelegramLongPollingBot implements PlaylistSende
         execute(sendDocument);
     }
 
-    private void sendVideoMessage(Long chatId, String videoId) {
-        try {
-            File videoFile = youtubeService.getYoutubeVideo(videoId);
-            try {
-                sendMessageWithFile(chatId, videoFile);
-            } catch (TelegramApiException e) {
-                sendMessage(chatId, "Не удалось отправить файл.");
-            } finally {
-                videoFile.delete();
-            }
-        } catch (VideoDownloadingException e) {
-            sendMessage(chatId, e.getMessage());
-        }
-    }
-
     @Override
-    public void sendVideoMessage(Long chatId, File videoFile) {
+    public void sendAudioMessage(Long chatId, File videoFile) {
         try {
             sendMessageWithFile(chatId, videoFile);
         } catch (TelegramApiException e) {

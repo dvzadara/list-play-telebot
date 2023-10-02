@@ -1,6 +1,6 @@
 package com.example.telegramListPlay.youtubeService;
 
-import com.example.telegramListPlay.telegramBot.PlaylistSenderInterface;
+import com.example.telegramListPlay.telegramBot.AudiosSenderInterface;
 import com.example.telegramListPlay.Exceptions.PlaylistDownloadingException;
 import com.example.telegramListPlay.Exceptions.VideoDownloadingException;
 import com.github.kiulian.downloader.model.playlist.PlaylistInfo;
@@ -8,11 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Processes telegram user requests and sends responce using playlistSender
+ */
 @Service
 public class YoutubeService {
     YoutubeClient youtubeClient;
@@ -45,7 +49,7 @@ public class YoutubeService {
         }
     }
 
-    public String linkToPlaylistId(String link)  {
+    public String linkToPlaylistId(String link) {
         try {
             URL url = new URL(link);
             String query = url.getQuery();
@@ -104,15 +108,14 @@ public class YoutubeService {
     }
 
     public boolean isExistingYouTubeVideoId(String videoId) {
-        if (isYoutubeVideoId(videoId)) {
+        if (!isYoutubeVideoId(videoId)) {
             System.out.println("It is not videoId.");
             return false;
         }
-        if (youtubeClient.isExistingVideo(videoId)) {
-            System.out.println("video with id " + videoId + "not found");
+        if (youtubeClient.isExistingVideo(videoId))
             return true;
-        } else
-            return false;
+        System.out.println("video with id " + videoId + " not found");
+        return false;
     }
 
     public boolean isExistingYouTubePlaylistId(String playlistId) {
@@ -121,10 +124,11 @@ public class YoutubeService {
             return false;
         }
         if (youtubeClient.isExistingPlaylist(playlistId)) {
-            System.out.println("video with id " + playlistId + "not found");
             return true;
-        } else
+        } else {
+            System.out.println("video with id " + playlistId + "not found");
             return false;
+        }
     }
 
     public boolean isExistingYouTubeVideoLink(String link) {
@@ -138,10 +142,11 @@ public class YoutubeService {
             return false;
         }
         if (youtubeClient.isExistingVideo(videoId)) {
-            System.out.println("video with id " + videoId + "not found");
             return true;
-        } else
+        } else {
+            System.out.println("video with id " + videoId + "not found");
             return false;
+        }
     }
 
     public boolean isExistingYouTubePlaylistLink(String link) {
@@ -155,30 +160,46 @@ public class YoutubeService {
             return false;
         }
         if (youtubeClient.isExistingPlaylist(playlistId)) {
-            System.out.println("video with id " + playlistId + "not found");
             return true;
-        } else
+        } else {
+            System.out.println("video with id " + playlistId + "not found");
             return false;
+        }
     }
 
-    public File getYoutubeVideo(String videoId) throws VideoDownloadingException {
-        if (isExistingYouTubeVideoId(videoId))
-            throw new VideoDownloadingException(
-                    "Не удалось найти видео с таким id, возможно его не существует или ссылка была указана не верно.");
-        return youtubeClient.downloadAudio(videoId);
+    public void getYoutubeVideo(Long chatId, String videoId, AudiosSenderInterface playlistSender) {
+        File file = null;
+        File mp3File = null;
+        try {
+            if (!isExistingYouTubeVideoId(videoId))
+                throw new VideoDownloadingException(
+                        "Не удалось найти видео с таким id, возможно его не существует или ссылка была указана не верно.");
+            file = youtubeClient.downloadAudio(videoId);
+            try {
+                mp3File = ToMp3Converter.mediaFileToMp3(file);
+            } catch (IOException e) {
+                throw new VideoDownloadingException("Не удалось конвертировать видео в нужный формат.");
+            }
+            playlistSender.sendAudioMessage(chatId, mp3File);
+        } catch (VideoDownloadingException e) {
+            playlistSender.sendVideoDownloadingError(chatId, e);
+        } finally {
+            if (file != null)
+                file.delete();
+            if (mp3File != null)
+                mp3File.delete();
+        }
     }
 
-    public void getYoutubePlaylist(Long chatId, String playlistId, PlaylistSenderInterface playlistSender) {
+    public void getYoutubePlaylist(Long chatId, String playlistId, AudiosSenderInterface playlistSender) {
         playlistSender.sendStartDownloadingMessage(chatId);
         try {
             PlaylistInfo playlistInfo = youtubeClient.getPlaylistInfo(playlistId);
-            int videoCount = playlistInfo.details().videoCount();
+            int videoCount = playlistInfo.videos().size();
             for(int i = 0; i < videoCount; i++){
-                File file = youtubeClient.downloadAudio(playlistInfo.videos().get(i).videoId());
-                playlistSender.sendVideoMessage(chatId, file);
-                file.delete();
+                getYoutubeVideo(chatId, playlistInfo.videos().get(i).videoId(), playlistSender);
             }
-        } catch (PlaylistDownloadingException | VideoDownloadingException e) {
+        } catch (PlaylistDownloadingException e) {
             playlistSender.sendVideoDownloadingError(chatId, e);
         }
         playlistSender.sendEndDownloadingMessage(chatId);
