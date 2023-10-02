@@ -30,8 +30,9 @@ public class YoutubeClient {
         Format format = videoInfo.bestAudioFormat();
         String name = videoInfo.details().title();
         RequestVideoFileDownload audioRequest = new RequestVideoFileDownload(format)
-                .renameTo(name).
-                overwriteIfExists(true);
+                .renameTo(name)
+                .overwriteIfExists(true)
+                .saveTo(new File("tmp/videos"));
         Response<File> response = downloader.downloadVideoFile(audioRequest);
         if (!response.ok())
             throw new VideoDownloadingException("Не удалось скачать видео по ссылке.");
