@@ -178,7 +178,7 @@ public class YoutubeService {
             try {
                 mp3File = ToMp3Converter.mediaFileToMp3(file);
             } catch (IOException e) {
-                throw new VideoDownloadingException("Не удалось конвертировать видео в нужный формат.");
+                throw new VideoDownloadingException("Не удалось конвертировать видео в нужный формат.", e);
             }
             playlistSender.sendAudioMessage(chatId, mp3File);
         } catch (VideoDownloadingException e) {

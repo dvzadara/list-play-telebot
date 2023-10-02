@@ -32,11 +32,11 @@ public class YoutubeClient {
         RequestVideoFileDownload audioRequest = new RequestVideoFileDownload(format)
                 .renameTo(name)
                 .overwriteIfExists(true)
-                .saveTo(new File("tmp/videos"));
+                .saveTo(new File("tmp/"));
         Response<File> response = downloader.downloadVideoFile(audioRequest);
         if (!response.ok())
             throw new VideoDownloadingException("Не удалось скачать видео по ссылке.");
-        if (response.data().exists())
+        if (!response.data().exists())
             throw new VideoDownloadingException("Не удалось создать файл.");
         return response.data();
     }

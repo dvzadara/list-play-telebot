@@ -136,7 +136,7 @@ public class TelegramBot extends TelegramLongPollingBot implements AudiosSenderI
 
     @Override
     public void sendVideoDownloadingError(Long chatId, Exception e) {
-        logger.log(Level.SEVERE, "Send downloading error to user", e);
+        logger.log(Level.SEVERE, "Send downloading error to user", e.getStackTrace());
         sendMessage(chatId, e.getMessage());
     }
 }
