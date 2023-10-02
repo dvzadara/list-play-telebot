@@ -14,14 +14,14 @@ public class ToMp3Converter {
     public static File mediaFileToMp3(File mediaFile) throws IOException {
         String mediaFilePath = mediaFile.getPath();
         String mp3FilePath = mediaFile.getParent() + changeFileExtension(mediaFile.getName(), "mp3");
-//        FFmpeg ffmpeg = new FFmpeg("lib/ffmpeg/bin/ffmpeg.exe");
-//        FFprobe ffprobe = new FFprobe("lib/ffmpeg/bin/ffmpeg.exe");
+        FFmpeg ffmpeg = new FFmpeg("lib/ffmpeg-linux/ffmpeg");
+        FFprobe ffprobe = new FFprobe("lib/ffmpeg-linux/ffmpeg");
         FFmpegBuilder builder = new FFmpegBuilder()
                 .setInput(mediaFilePath)
                 .addOutput(mp3FilePath)
                 .done();
 
-        FFmpegExecutor executor = new FFmpegExecutor();
+        FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
         executor.createJob(builder).run();
         return new File(mp3FilePath);
     }
