@@ -14,8 +14,8 @@ public class ToMp3Converter {
     public static File mediaFileToMp3(File mediaFile) throws IOException {
         String mediaFilePath = mediaFile.getPath();
         String mp3FilePath = mediaFile.getParent() + changeFileExtension(mediaFile.getName(), "mp3");
-        FFmpeg ffmpeg = new FFmpeg("/lib/ffmpeg/bin/ffmpeg.exe");
-        FFprobe ffprobe = new FFprobe("/lib/ffmpeg/bin/ffprobe.exe");
+        FFmpeg ffmpeg = new FFmpeg("lib/ffmpeg/bin/ffmpeg.exe");
+        FFprobe ffprobe = new FFprobe("lib/ffmpeg/bin/ffmpeg.exe");
         FFmpegBuilder builder = new FFmpegBuilder()
                 .setInput(mediaFilePath)
                 .addOutput(mp3FilePath)
