@@ -7,6 +7,7 @@ import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.*;
 
 public class ToMp3Converter {
     public static File mediaFileToMp3(File mediaFile) throws IOException {

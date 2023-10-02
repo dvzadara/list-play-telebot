@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
+import java.util.logging.*;
 
 /**
  * Сlass for processing messages from the Telegram user, and with functions for sending messages.
@@ -21,6 +22,7 @@ public class TelegramBot extends TelegramLongPollingBot implements AudiosSenderI
     private YoutubeService youtubeService;
     private static final String START = "/start";
     private static final String GET_VIDEO = "/video";
+    private static final Logger logger = Logger.getLogger(TelegramBot.class.getName());
 
     @Autowired
     public TelegramBot(@Value("${bot.token}") String botToken, YoutubeService youtubeService) {
@@ -134,6 +136,7 @@ public class TelegramBot extends TelegramLongPollingBot implements AudiosSenderI
 
     @Override
     public void sendVideoDownloadingError(Long chatId, Exception e) {
+        logger.log(Level.SEVERE, "Send downloading error to user", e);
         sendMessage(chatId, e.getMessage());
     }
 }
