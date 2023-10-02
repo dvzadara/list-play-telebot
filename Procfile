@@ -1,1 +1,1 @@
-worker: java -jar target/java-getting-started-1.0.0-SNAPSHOT.jar
+worker: java -jar target/telegramListPlay-0.0.1-SNAPSHOT.jar
