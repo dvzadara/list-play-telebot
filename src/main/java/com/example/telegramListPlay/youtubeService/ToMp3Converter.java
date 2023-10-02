@@ -15,7 +15,7 @@ public class ToMp3Converter {
         String mediaFilePath = mediaFile.getPath();
         String mp3FilePath = mediaFile.getParent() + changeFileExtension(mediaFile.getName(), "mp3");
         FFmpeg ffmpeg = new FFmpeg("lib/ffmpeg-linux/ffmpeg");
-        FFprobe ffprobe = new FFprobe("lib/ffmpeg-linux/ffmpeg");
+        FFprobe ffprobe = new FFprobe("lib/ffmpeg-linux/ffprobe");
         FFmpegBuilder builder = new FFmpegBuilder()
                 .setInput(mediaFilePath)
                 .addOutput(mp3FilePath)
