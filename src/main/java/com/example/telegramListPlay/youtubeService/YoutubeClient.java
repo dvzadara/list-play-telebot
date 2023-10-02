@@ -36,6 +36,8 @@ public class YoutubeClient {
         Response<File> response = downloader.downloadVideoFile(audioRequest);
         if (!response.ok())
             throw new VideoDownloadingException("Не удалось скачать видео по ссылке.");
+        if (response.data().exists())
+            throw new VideoDownloadingException("Не удалось создать файл.");
         return response.data();
     }
 
