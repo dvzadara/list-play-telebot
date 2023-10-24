@@ -81,13 +81,13 @@ public class TelegramBot extends TelegramLongPollingBot implements AudiosSenderI
      */
     private void sendWelcomeMessage(Long chatId) {
         String text = """
-                Добро пожаловать!
-                                
-                Ютуб не дает слушать ваш плейлист с музыкой или подкаст когда вы выключили телефон?(
-                                
-                Данный бот позволяет скачать видео или плейлист из Youtube в .mp3 формате после чего вы можете использовать аудио.
-                                
-                Введите ссылку на плейлист или видео которые вы хотите преобразовать в .mp3.
+                Ласкаво просимо!
+                
+                Ютуб не дає слухати ваш плейлист з музикою або подкаст, коли ви вимкнули телефон?
+                
+                Цей бот дозволяє завантажити відео або плейлист з Youtube в форматі .mp3 після чого ви можете використовувати аудіо.
+                
+                Введіть посилання на плейлист або відео, які ви хочете перетворити на .mp3(Приклад: https://www.youtube.com/watch?v=dQw4w9WgXcQ).
                 """;
         sendMessage(chatId, text);
     }
@@ -98,7 +98,7 @@ public class TelegramBot extends TelegramLongPollingBot implements AudiosSenderI
      */
     private void sendUncorrectRequestMessage(Long chatId) {
         String text = """
-                Не удалось найти ссылку или id ютуб видео или плейлиста. Возможно в ссылке ошибка.
+                Не вдалося знайти посилання на відео або плейлист. Можливо в посиланні помилка.
                 """;
         sendMessage(chatId, text);
     }
@@ -115,14 +115,14 @@ public class TelegramBot extends TelegramLongPollingBot implements AudiosSenderI
         try {
             sendMessageWithFile(chatId, videoFile);
         } catch (TelegramApiException e) {
-            sendMessage(chatId, "Не удалось отправить файл.");
+            sendMessage(chatId, "Не вдалося відправити файл.");
         }
     }
 
     @Override
     public void sendStartDownloadingMessage(Long chatId) {
         String text = """
-                Загрузка плейлиста началась.
+                Завантаження плейлиста розпочалося.
                 """;
         sendMessage(chatId, text);
     }
@@ -130,7 +130,7 @@ public class TelegramBot extends TelegramLongPollingBot implements AudiosSenderI
     @Override
     public void sendEndDownloadingMessage(Long chatId) {
         String text = """
-                Загрузка плейлиста завершена.
+                Завантаження плейлиста завершено.
                 """;
     }
 

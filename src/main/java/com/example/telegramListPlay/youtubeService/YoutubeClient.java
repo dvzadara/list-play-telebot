@@ -57,7 +57,7 @@ public class YoutubeClient {
         RequestPlaylistInfo infoRequest = new RequestPlaylistInfo(playlistId);
         Response<PlaylistInfo> infoResponse = downloader.getPlaylistInfo(infoRequest);
         if (!infoResponse.ok())
-            throw new PlaylistDownloadingException("Не удалось скачать плейлист по ссылке.");
+            throw new PlaylistDownloadingException("Неможливо завантажити плейлист за посиланням.");
         return infoResponse.data();
     }
 

@@ -14,7 +14,7 @@ public class ToMp3Converter {
     public static File mediaFileToMp3(File mediaFile) throws IOException, VideoDownloadingException {
         try {
             if (!mediaFile.exists()) {
-                throw new VideoDownloadingException("Не удалось найти скачанный файл.");
+                throw new VideoDownloadingException("Не вдалося знайти завантажений файл.");
             }
             String mediaFilePath = mediaFile.getPath();
             String mp3FilePath = mediaFile.getParent() + "/" + changeFilenameExtension(mediaFile.getName(), "mp3");
@@ -44,11 +44,11 @@ public class ToMp3Converter {
             System.out.println(result);
             File outputFile = new File(mp3FilePath);
             if (!outputFile.exists()) {
-                throw new VideoDownloadingException("Не удалось конвертировать файл.");
+                throw new VideoDownloadingException("Неможливо конвертувати файл.");
             }
             return outputFile;
         } catch (IOException | InterruptedException e) {
-            throw new VideoDownloadingException("Не удалось конвертировать файл.", e);
+            throw new VideoDownloadingException("Неможливо конвертувати файл.", e);
         }
     }
 

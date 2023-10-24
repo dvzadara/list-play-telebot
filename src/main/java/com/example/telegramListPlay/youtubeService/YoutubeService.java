@@ -173,12 +173,12 @@ public class YoutubeService {
         try {
             if (!isExistingYouTubeVideoId(videoId))
                 throw new VideoDownloadingException(
-                        "Не удалось найти видео с таким id, возможно его не существует или ссылка была указана не верно.");
+                        "Не вдалося знайти відео з таким ID, можливо його не існує або посилання було вказано неправильно.");
             file = youtubeClient.downloadAudio(videoId);
             try {
                 mp3File = ToMp3Converter.mediaFileToMp3(file);
             } catch (IOException e) {
-                throw new VideoDownloadingException("Не удалось конвертировать видео в нужный формат.", e);
+                throw new VideoDownloadingException("Не вдалося конвертувати відео у потрібний формат.", e);
             }
             playlistSender.sendAudioMessage(chatId, mp3File);
         } catch (VideoDownloadingException e) {
