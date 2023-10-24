@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.1.4</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.example</groupId>
+	<artifactId>telegramListPlay</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>telegramListPlay</name>
+	<description>ListPlay telegram bot for converting youtube playlists or videos to mp3 files</description>
+	<properties>
+		<java.version>17</java.version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.telegram/telegrambots -->
+		<dependency>
+			<groupId>org.telegram</groupId>
+			<artifactId>telegrambots</artifactId>
+			<version>6.5.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.github.sealedtx/java-youtube-downloader -->
+		<dependency>
+			<groupId>com.github.sealedtx</groupId>
+			<artifactId>java-youtube-downloader</artifactId>
+			<version>3.2.3</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/net.bramp.ffmpeg/ffmpeg -->
+<!--		<dependency>-->
+<!--			<groupId>net.bramp.ffmpeg</groupId>-->
+<!--			<artifactId>ffmpeg</artifactId>-->
+<!--			<version>0.6.2</version>-->
+<!--		</dependency>-->
+
+		<!-- https://mvnrepository.com/artifact/com.tagtraum/ffmpeg -->
+		<dependency>
+			<groupId>com.tagtraum</groupId>
+			<artifactId>ffmpeg-x86_64-linux</artifactId>
+			<version>4.0.11</version>
+		</dependency>
+	</dependencies>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+
+			<plugin>
+				<groupId>com.heroku.sdk</groupId>
+				<artifactId>heroku-maven-plugin</artifactId>
+				<version>3.0.7</version>
+				<configuration>
+					<jdkVersion>17</jdkVersion>
+				</configuration>
+			</plugin>
+<!--			<plugin>-->
+<!--				<artifactId>maven-war-plugin</artifactId>-->
+<!--				<version>2.3</version>-->
+<!--				<configuration>-->
+<!--					<webResources>-->
+<!--						<resource>-->
+<!--							<directory>lib</directory>-->
+<!--							<targetPath>WEB-INF/bin</targetPath>-->
+<!--						</resource>-->
+<!--					</webResources>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
+		</plugins>
+	</build>
+
+</project>
